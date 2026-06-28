@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Datarock Core — FY27 Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<style>
+:root{
+  --dr-sand:#e9dfd2;--dr-sand-light:#f4efe8;--dr-sand-dark:#d4cabb;
+  --dr-charcoal:#231f20;--dr-charcoal-light:#3a3637;--dr-charcoal-dark:#1a1718;
+  --dr-terracotta:#d57a5a;--dr-terracotta-light:#e4a28c;--dr-terracotta-dark:#b85f3f;
+  --dr-white:#ffffff;--dr-black:#000000;
+  --dr-text-muted:#6b6264;--dr-text-muted-dark:#a89e9b;
+  --dr-border:#d4cabb;--dr-border-dark:#3a3637;
+  --dr-success:#5a8a5c;--dr-warning:#d4a24e;--dr-error:#c44d3f;--dr-info:#5a7a8a;
+  --dr-font-display:'Unbounded',system-ui,sans-serif;
+  --dr-font-body:'DM Sans',system-ui,sans-serif;
+  --dr-font-mono:'JetBrains Mono',monospace;
+  --dr-radius-sm:8px;--dr-radius-md:10px;--dr-radius-lg:14px;--dr-radius-xl:18px;
+  --dr-shadow-md:0 4px 12px rgba(35,31,32,.08);
+  --dr-shadow-xl:0 16px 48px rgba(35,31,32,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--dr-font-body);background:var(--dr-sand);color:var(--dr-charcoal);min-height:100vh;-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.55;}
+h1,h2,h3,h4{font-family:var(--dr-font-display);line-height:1.15;}
+/* topbar */
+.topbar{background:var(--dr-charcoal);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--dr-border-dark);}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-wordmark{font-family:var(--dr-font-display);font-size:13px;font-weight:700;color:var(--dr-white);letter-spacing:.04em;}
+.topbar-sub{font-size:11px;color:var(--dr-text-muted-dark);font-family:var(--dr-font-mono);padding-left:12px;border-left:1px solid var(--dr-border-dark);}
+.topbar-btns{display:flex;gap:8px;align-items:center;}
+.topbar-btn{font-family:var(--dr-font-body);font-size:12px;font-weight:600;border:none;border-radius:var(--dr-radius-sm);padding:6px 14px;cursor:pointer;transition:all 150ms;white-space:nowrap;}
+.btn-save{background:var(--dr-terracotta);color:var(--dr-white);}
+.btn-save:hover{background:var(--dr-terracotta-dark);}
+.save-indicator{font-family:var(--dr-font-mono);font-size:10px;color:var(--dr-text-muted-dark);opacity:0;transition:opacity 400ms;}
+.save-indicator.show{opacity:1;}
+/* tab nav */
+.tab-nav{background:var(--dr-charcoal-light);display:flex;gap:2px;padding:0 28px;border-bottom:1px solid var(--dr-border-dark);overflow-x:auto;}
+.tab-btn{font-family:var(--dr-font-body);font-size:13px;font-weight:500;color:var(--dr-text-muted-dark);background:transparent;border:none;padding:12px 18px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 150ms;}
+.tab-btn:hover{color:var(--dr-sand);}
+.tab-btn.active{color:var(--dr-terracotta);border-bottom-color:var(--dr-terracotta);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+/* ranking */
+.ranking-wrap{max-width:900px;margin:0 auto;padding:32px 24px;}
+.rank-group-label{font-family:var(--dr-font-mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--dr-terracotta);margin:28px 0 10px;display:flex;align-items:center;gap:8px;}
+.rank-group-label::after{content:'';flex:1;height:1px;background:var(--dr-border);}
+.rank-group-label:first-child{margin-top:0;}
+/* cards */
+.card{background:var(--dr-white);border-radius:var(--dr-radius-md);border:1px solid var(--dr-border);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:box-shadow 150ms,transform 150ms;border-left:3px solid var(--dr-border);}
+.card:hover{box-shadow:var(--dr-shadow-md);transform:translateY(-1px);}
+.card.sortable-ghost{opacity:.4;background:var(--dr-sand);}
+.card[data-status="inflight"]{border-left-color:var(--dr-terracotta);}
+.card[data-status="prev-comm"]{border-left-color:var(--dr-info);}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.card-title{font-family:var(--dr-font-display);font-size:11px;font-weight:600;color:var(--dr-charcoal);line-height:1.3;flex:1;}
+.card-score{font-family:var(--dr-font-mono);font-size:11px;font-weight:700;color:var(--dr-white);background:var(--dr-charcoal);border-radius:var(--dr-radius-sm);padding:2px 7px;flex-shrink:0;}
+.card-pills{display:flex;gap:5px;flex-wrap:wrap;}
+.pill{font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:99px;font-family:var(--dr-font-mono);white-space:nowrap;}
+.pill-inflight{background:rgba(213,122,90,.12);color:var(--dr-terracotta-dark);}
+.pill-prevcomm{background:rgba(90,122,138,.12);color:var(--dr-info);}
+.pill-backlog{background:rgba(107,98,100,.1);color:var(--dr-text-muted);}
+.pill-mvp1{background:rgba(90,138,92,.12);color:#3d6b3f;}
+.pill-mvp2{background:rgba(212,162,78,.12);color:#8a6420;}
+.pill-mvp3{background:rgba(196,77,63,.12);color:var(--dr-error);}
+.pill-na{background:rgba(107,98,100,.08);color:var(--dr-text-muted);}
+/* evidence badges */
+.ev-badge{display:inline-block;font-family:var(--dr-font-mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:4px;}
+.ev-HubSpot,.ev-Multiple{background:rgba(213,122,90,.15);color:var(--dr-terracotta-dark);}
+.ev-CsMemo{background:rgba(212,162,78,.15);color:#7a5810;}
+.ev-HelpDesk{background:rgba(90,122,138,.15);color:var(--dr-info);}
+.ev-Production,.ev-Compliance{background:rgba(196,77,63,.15);color:var(--dr-error);}
+.ev-Strategic,.ev-Internal{background:rgba(107,98,100,.1);color:var(--dr-text-muted);}
+/* swimlane */
+.cut-wrap{padding:0 20px 32px;}
+.narrative-box{background:var(--dr-charcoal);color:var(--dr-sand);border-radius:var(--dr-radius-lg);padding:24px 28px;margin:20px 0 16px;}
+.narrative-eyebrow{font-family:var(--dr-font-mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--dr-terracotta);margin-bottom:8px;}
+.narrative-headline{font-family:var(--dr-font-display);font-size:13.5px;font-weight:700;color:var(--dr-white);margin-bottom:10px;line-height:1.4;}
+.narrative-body{font-size:13px;color:var(--dr-text-muted-dark);line-height:1.6;}
+.narrative-evidence{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);font-style:italic;}
+.pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.pros-cons-box{background:rgba(255,255,255,.06);border-radius:var(--dr-radius-sm);padding:12px 14px;}
+.pros-cons-label{font-family:var(--dr-font-mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.pros-cons-box.pros .pros-cons-label{color:#7ec87f;}
+.pros-cons-box.cons .pros-cons-label{color:#e4826e;}
+.pros-cons-box ul{list-style:none;padding:0;}
+.pros-cons-box li{font-size:12px;color:var(--dr-text-muted-dark);padding:3px 0;display:flex;gap:6px;}
+.pros-cons-box.pros li::before{content:'✓';color:#7ec87f;flex-shrink:0;font-weight:700;}
+.pros-cons-box.cons li::before{content:'✕';color:#e4826e;flex-shrink:0;font-weight:700;}
+.swimlane{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;align-items:start;}
+.swim-col{background:var(--dr-sand-light);border-radius:var(--dr-radius-lg);border:1px solid var(--dr-border);min-height:200px;display:flex;flex-direction:column;}
+.swim-col-head{padding:12px 14px 10px;border-bottom:1px solid var(--dr-border);background:var(--dr-white);border-radius:var(--dr-radius-lg) var(--dr-radius-lg) 0 0;}
+.swim-col-title{font-family:var(--dr-font-display);font-size:11px;font-weight:700;color:var(--dr-charcoal);}
+.swim-col-sub{font-family:var(--dr-font-mono);font-size:10px;color:var(--dr-text-muted);margin-top:2px;}
+.swim-col-badge{display:inline-block;font-family:var(--dr-font-mono);font-size:9px;font-weight:700;background:var(--dr-terracotta);color:var(--dr-white);padding:2px 6px;border-radius:4px;margin-top:4px;}
+.card-list{padding:10px 8px;flex:1;min-height:80px;}
+.card-list .card{margin-bottom:7px;}
+.swim-col .card-title{font-size:10px;}
+/* open tab */
+.open-wrap{padding:0 20px 32px;}
+.open-layout{display:grid;grid-template-columns:250px 1fr;gap:16px;margin-top:16px;align-items:start;}
+.pool-panel{background:var(--dr-sand-light);border:1px solid var(--dr-border);border-radius:var(--dr-radius-lg);}
+.pool-head{padding:12px 14px;border-bottom:1px solid var(--dr-border);background:var(--dr-white);border-radius:var(--dr-radius-lg) var(--dr-radius-lg) 0 0;}
+.pool-title{font-family:var(--dr-font-display);font-size:11px;font-weight:700;}
+.pool-sub{font-family:var(--dr-font-mono);font-size:9.5px;color:var(--dr-text-muted);margin-top:3px;}
+.open-swimlane{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(35,31,32,.65);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;}
+.modal-overlay[hidden]{display:none;}
+.modal-box{background:var(--dr-white);border-radius:var(--dr-radius-xl);max-width:600px;width:100%;box-shadow:var(--dr-shadow-xl);overflow:hidden;max-height:90vh;display:flex;flex-direction:column;animation:modal-in 220ms cubic-bezier(.2,.8,.2,1);}
+@keyframes modal-in{from{opacity:0;transform:translateY(8px) scale(.98);}to{opacity:1;transform:none;}}
+.modal-head{background:var(--dr-charcoal);padding:20px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0;}
+.modal-title{font-family:var(--dr-font-display);font-size:13px;font-weight:700;color:var(--dr-white);line-height:1.3;flex:1;}
+.modal-close{background:rgba(255,255,255,.1);border:none;color:var(--dr-white);width:28px;height:28px;border-radius:99px;cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:rgba(255,255,255,.2);}
+.modal-pills{padding:0 24px 14px;background:var(--dr-charcoal);display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;}
+.modal-body{padding:18px 24px;overflow-y:auto;}
+.modal-section{margin-bottom:16px;}
+.modal-section:last-child{margin-bottom:0;}
+.modal-label{font-family:var(--dr-font-mono);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dr-terracotta);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.modal-label::before{content:'';display:block;width:16px;height:2px;background:var(--dr-terracotta);}
+.modal-text{font-size:13.5px;color:var(--dr-charcoal-light);line-height:1.65;}
+.modal-score-row{display:flex;gap:8px;flex-wrap:wrap;}
+.modal-score-chip{font-family:var(--dr-font-mono);font-size:11px;background:var(--dr-sand);border-radius:var(--dr-radius-sm);padding:5px 10px;}
+.modal-score-chip strong{color:var(--dr-terracotta);}
+.evidence-box{background:var(--dr-sand-light);border-radius:var(--dr-radius-md);border:1px solid var(--dr-border);padding:12px 14px;}
+.evidence-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.evidence-stat{font-family:var(--dr-font-display);font-size:11px;font-weight:600;}
+.evidence-tickets{display:flex;flex-direction:column;gap:4px;margin-bottom:6px;}
+.ticket-ref{font-family:var(--dr-font-mono);font-size:10.5px;color:var(--dr-text-muted);background:var(--dr-white);border:1px solid var(--dr-border);border-radius:4px;padding:3px 8px;display:inline-block;}
+.evidence-note{font-size:12px;color:var(--dr-text-muted);line-height:1.5;font-style:italic;}
+/* ── VOTE TAB ── */
+.vote-wrap{padding:0 20px 40px;}
+#vote-content{}
+.vote-header{background:var(--dr-charcoal);border-radius:var(--dr-radius-lg);padding:24px 28px;margin:20px 0 16px;}
+.vote-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px;}
+.vote-subtitle{font-size:13px;color:var(--dr-text-muted-dark);margin-top:6px;line-height:1.5;}
+.sync-status{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--dr-text-muted-dark);transition:background 300ms;align-self:flex-end;}
+.sync-dot.synced{background:var(--dr-success);}
+.sync-ts{font-family:var(--dr-font-mono);font-size:9px;color:var(--dr-text-muted-dark);white-space:nowrap;}
+.voter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.voter-label{font-size:12px;color:var(--dr-text-muted-dark);font-family:var(--dr-font-mono);white-space:nowrap;}
+.voter-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.voter-pill{font-family:var(--dr-font-body);font-size:12px;font-weight:600;padding:6px 16px;border-radius:99px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:var(--dr-text-muted-dark);cursor:pointer;transition:all 150ms;}
+.voter-pill:hover{background:rgba(255,255,255,.12);color:var(--dr-sand);}
+.voter-pill.active{background:var(--dr-terracotta);border-color:var(--dr-terracotta);color:var(--dr-white);}
+.voter-pill.view-only{border-style:dashed;}
+.clear-votes-btn{font-family:var(--dr-font-mono);font-size:10px;font-weight:600;padding:5px 12px;border-radius:var(--dr-radius-sm);border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.4);cursor:pointer;transition:all 150ms;margin-left:auto;}
+.clear-votes-btn:hover{background:rgba(196,77,63,.3);border-color:var(--dr-error);color:var(--dr-white);}
+.vote-table-wrap{overflow-x:auto;border-radius:var(--dr-radius-lg);border:1px solid var(--dr-border);box-shadow:var(--dr-shadow-md);}
+.vote-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--dr-white);}
+.vote-thead th{background:var(--dr-charcoal);color:var(--dr-white);font-family:var(--dr-font-display);font-size:10px;font-weight:700;padding:10px 10px;text-align:center;white-space:nowrap;position:sticky;top:56px;z-index:10;}
+.th-item{text-align:left!important;min-width:220px;}
+.th-num{width:36px;}
+.th-score{width:52px;}
+.th-mvp{width:64px;}
+.th-voter{width:78px;}
+.th-all{width:84px;background:var(--dr-charcoal-dark)!important;}
+.section-row td{background:var(--dr-charcoal-light);color:var(--dr-terracotta);font-family:var(--dr-font-mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:8px 14px;border-top:2px solid var(--dr-border-dark);}
+.section-above td{border-top:none;}
+.section-below td{border-top-color:var(--dr-terracotta);}
+.vote-item-row{border-bottom:1px solid var(--dr-border);}
+.vote-item-row:nth-child(even){background:var(--dr-sand-light);}
+.vote-item-row:hover{background:rgba(213,122,90,.04);}
+.td-num{text-align:center;color:var(--dr-text-muted);font-family:var(--dr-font-mono);font-size:10px;padding:8px 6px;}
+.td-item{padding:10px 14px;cursor:pointer;}
+.td-item:hover .vote-item-title{color:var(--dr-terracotta);}
+.vote-item-title{font-family:var(--dr-font-display);font-size:10.5px;font-weight:600;color:var(--dr-charcoal);line-height:1.3;}
+.td-score{text-align:center;font-family:var(--dr-font-mono);font-size:12px;font-weight:700;padding:8px;}
+.td-mvp{text-align:center;padding:8px 6px;}
+.td-voter{text-align:center;padding:6px 4px;vertical-align:middle;}
+.td-all{text-align:center;padding:8px 6px;background:var(--dr-sand);font-family:var(--dr-font-mono);font-size:12px;vertical-align:middle;border-left:1px solid var(--dr-border);}
+.vci{display:flex;gap:3px;align-items:center;justify-content:center;}
+.rank-input{width:44px;text-align:center;font-family:var(--dr-font-mono);font-size:12px;font-weight:700;border:1px solid var(--dr-border);border-radius:var(--dr-radius-sm);padding:4px 4px;background:var(--dr-white);}
+.rank-input:focus{outline:none;border-color:var(--dr-terracotta);}
+.rank-input.fi{border-color:var(--dr-warning);}
+.flag-btn{width:22px;height:22px;border-radius:99px;border:1px solid var(--dr-border);background:transparent;cursor:pointer;font-size:10px;font-weight:700;color:var(--dr-text-muted);transition:all 150ms;flex-shrink:0;}
+.flag-btn:hover{border-color:var(--dr-warning);color:var(--dr-warning);}
+.flag-btn.flagged{background:var(--dr-warning);border-color:var(--dr-warning);color:var(--dr-white);}
+.vf{color:var(--dr-warning);font-weight:700;}
+.vc{font-size:9px;color:var(--dr-text-muted);}
+.fi-badge{font-size:9px;color:var(--dr-warning);font-weight:700;}
+.vote-legend{display:flex;gap:14px;align-items:center;margin-top:12px;font-size:11px;color:var(--dr-text-muted);font-family:var(--dr-font-mono);flex-wrap:wrap;}
+.legend-sep{color:var(--dr-border-dark);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-wordmark">DATAROCK</span>
+    <span class="topbar-sub">FY27 Roadmap Planning</span>
+  </div>
+  <div class="topbar-btns">
+    <span class="save-indicator" id="save-indicator">Saved</span>
+    <button class="topbar-btn btn-save" onclick="saveStateAsHTML()">Save State</button>
+  </div>
+</div>
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('ranking',this)">Ranking</button>
+  <button class="tab-btn" onclick="switchTab('cut1',this)">Cut 1 — Velocity</button>
+  <button class="tab-btn" onclick="switchTab('cut2',this)">Cut 2 — Foundations</button>
+  <button class="tab-btn" onclick="switchTab('open',this)">Open</button>
+  <button class="tab-btn" onclick="switchTab('vote',this)">&#127968; Executive Vote</button>
+</div>
+
+<div class="tab-panel active" id="tab-ranking">
+  <div class="ranking-wrap">
+    <div class="rank-group-label">In-flight</div><div id="rank-inflight"></div>
+    <div class="rank-group-label">Previously communicated</div><div id="rank-prevcomm"></div>
+    <div class="rank-group-label">Backlog — by score</div><div id="rank-backlog"></div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-cut1">
+  <div class="cut-wrap">
+    <div class="narrative-box">
+      <div class="narrative-eyebrow">Cut 1 · Velocity</div>
+      <div class="narrative-headline">Finish in-progress work, address compliance risk, and execute on customer feedback at pace.</div>
+      <div class="narrative-body">July locks in the compliance obligation and delivers the performance unlock customers have been waiting on. From Q1, we pivot to a high-throughput cadence — shipping MVP 1 customer feedback items that are well-understood and fast to deliver. The story externally is consistent momentum: customers see us shipping things they asked for, quarter after quarter.</div>
+      <div class="narrative-evidence">Evidence base: Q1 directly addresses 35+ tickets across the HubSpot feedback pipeline — the Bulk Operations cluster (#2 theme, 12 tickets), Notification &amp; Error UX (#6 theme, 8 tickets), and the CS Memo's top-ranked export reliability concern (median pipeline age 517 days). Data archiving in July resolves the CS Memo's #2 must-have requirement. By end of Q2, this cut covers 5 of the top 9 HubSpot themes and the #1 help desk operational burden (Data Manager, 39 tickets).</div>
+      <div class="pros-cons">
+        <div class="pros-cons-box pros"><div class="pros-cons-label">Pros</div><ul>
+          <li>High visible velocity — frequent customer-facing wins</li>
+          <li>Compliance risk resolved in July, no overhang</li>
+          <li>MVP 1 items are lower-risk, easier to scope and ship</li>
+          <li>Builds trust through consistent delivery cadence</li>
+        </ul></div>
+        <div class="pros-cons-box cons"><div class="pros-cons-label">Cons</div><ul>
+          <li>Defers Depth Reg Editing (#1 HubSpot theme) to Q2</li>
+          <li>Daily Logging items (AGA, Evolution, Gold Fields tickets) pushed to Q3</li>
+          <li>May feel like optimising for optics over foundational impact</li>
+          <li>Leaves revenue-critical work later in FY27</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="swimlane">
+      <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">July</div><div class="swim-col-sub">Compliance + carry-over</div><div class="swim-col-badge">Q1 FY27</div></div><div class="card-list" id="col-cut1-july"></div></div>
+      <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">Q1 FY27</div><div class="swim-col-sub">Aug – Sep 2026</div></div><div class="card-list" id="col-cut1-q1"></div></div>
+      <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">Q2 FY27</div><div class="swim-col-sub">Oct – Dec 2026</div></div><div class="card-list" id="col-cut1-q2"></div></div>
+      <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">Q3 FY27+</div><div class="swim-col-sub">Jan 2027 onwards</div></div><div class="card-list" id="col-cut1-q3"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-cut2">
+  <div class="cut-wrap">
+    <div class="narrative-box">
+      <div class="narrative-eyebrow">Cut 2 · Foundations</div>
+      <div class="narrative-headline">Address foundational customer pain immediately — accepting a period of slower visible delivery.</div>
+      <div class="narrative-body">July handles the compliance obligation. From Q1, we go straight at the highest-priority customer items regardless of complexity. Depth Registration Editing and the Daily Logging primitives are foundational — shipping them unlocks significant FY28 revenue conversations. The risk: MVP 3 items in Q1 mean a quieter external narrative early in the year, which may read as lack of direction to stakeholders used to fast cadence.</div>
+      <div class="narrative-evidence">Evidence base: Q1 leads with the most evidenced item in the pipeline — Depth Registration Editing, the #1 HubSpot theme with 15 tickets across 8 accounts, median pipeline age 199 days. The Daily Logging items are directly evidenced by a named account ticket cluster across 5 tickets (#24522762511, #119704704489, #123828460020, #253695105495, #22497133731) identifying result integrity as an active production concern. By end of Q2, 4 of the top 5 HubSpot themes are addressed.</div>
+      <div class="pros-cons">
+        <div class="pros-cons-box pros"><div class="pros-cons-label">Pros</div><ul>
+          <li>Depth Reg Editing (#1 HubSpot theme, 15 tickets) ships in Q1</li>
+          <li>Daily Logging items (5 named-account tickets) addressed in Q1</li>
+          <li>Daily Logging unlocks FY28 revenue conversations</li>
+          <li>Signals strategic seriousness about foundational issues</li>
+        </ul></div>
+        <div class="pros-cons-box cons"><div class="pros-cons-label">Cons</div><ul>
+          <li>MVP 3 items in Q1 mean slower visible delivery pace</li>
+          <li>Credibility risk if foundational items run over schedule</li>
+          <li>Fewer quick wins for CS in early-quarter conversations</li>
+          <li>Harder to demonstrate FY27 momentum to leadership</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="swimlane">
+      <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">July</div><div class="swim-col-sub">Compliance + carry-over</div><div class="swim-col-badge">Q1 FY27</div></div><div class="card-list" id="col-cut2-july"></div></div>
+      <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">Q1 FY27</div><div class="swim-col-sub">Aug – Sep 2026</div></div><div class="card-list" id="col-cut2-q1"></div></div>
+      <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">Q2 FY27</div><div class="swim-col-sub">Oct – Dec 2026</div></div><div class="card-list" id="col-cut2-q2"></div></div>
+      <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">Q3 FY27+</div><div class="swim-col-sub">Jan 2027 onwards</div></div><div class="card-list" id="col-cut2-q3"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-open">
+  <div class="open-wrap">
+    <div class="narrative-box">
+      <div class="narrative-eyebrow">Open · Facilitated session</div>
+      <div class="narrative-headline">All items ranked by score. Drag to build your roadmap.</div>
+      <div class="narrative-body">Move cards from the pool into time columns during the live session. Items are ordered by composite score within their status tier. Click any card to see the customer evidence behind it.</div>
+    </div>
+    <div class="open-layout">
+      <div class="pool-panel">
+        <div class="pool-head"><div class="pool-title">All items</div><div class="pool-sub">Drag into columns &#8594;</div></div>
+        <div class="card-list" id="col-open-pool" style="max-height:calc(100vh - 300px);overflow-y:auto;padding:10px 8px;min-height:100px;"></div>
+      </div>
+      <div class="open-swimlane">
+        <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">July</div><div class="swim-col-sub">Compliance + carry-over</div><div class="swim-col-badge">Q1 FY27</div></div><div class="card-list" id="col-open-july" style="min-height:100px;"></div></div>
+        <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">Q1 FY27</div><div class="swim-col-sub">Aug – Sep 2026</div></div><div class="card-list" id="col-open-q1" style="min-height:100px;"></div></div>
+        <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">Q2 FY27</div><div class="swim-col-sub">Oct – Dec 2026</div></div><div class="card-list" id="col-open-q2" style="min-height:100px;"></div></div>
+        <div class="swim-col"><div class="swim-col-head"><div class="swim-col-title">Q3 FY27+</div><div class="swim-col-sub">Jan 2027 onwards</div></div><div class="card-list" id="col-open-q3" style="min-height:100px;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-vote">
+  <div class="vote-wrap">
+    <div id="vote-content"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal" hidden>
+  <div class="modal-box">
+    <div class="modal-head"><div class="modal-title" id="modal-title"></div><button class="modal-close" onclick="closeModal()">&#x2715;</button></div>
+    <div class="modal-pills" id="modal-pills"></div>
+    <div class="modal-body">
+      <div class="modal-section"><div class="modal-label">Customer evidence</div><div class="evidence-box"><div class="evidence-top"><span class="ev-badge" id="modal-ev-badge"></span><span class="evidence-stat" id="modal-ev-stat"></span></div><div class="evidence-tickets" id="modal-ev-tickets"></div><div class="evidence-note" id="modal-ev-note"></div></div></div>
+      <div class="modal-section"><div class="modal-score-row" id="modal-scores"></div></div>
+      <div class="modal-section"><div class="modal-label">What it is</div><div class="modal-text" id="modal-b"></div></div>
+      <div class="modal-section"><div class="modal-label">Why it matters</div><div class="modal-text" id="modal-c"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const ITEMS = [{"id": "acquire-in", "title": "acQuire - Data In", "b": "We can get input data into Datarock Core using the acQuire Connector.", "c": "Datarock customers who use acQuire currently have to manually handle input data between the systems which is inefficient.", "score": 16, "status": "inflight", "mvp": "na", "d": 4, "e": 3, "f": 3, "g": 3, "evidence": {"source": "Strategic", "stat": "Commercial integration requirement", "tickets": [], "note": "Enables automated data flow for acQuire customers. No direct customer ticket — pipeline commitment."}}, {"id": "nexus-infra", "title": "Nexus Visualisations - Infrastructure", "b": "Define a way for the ML tenancy to communicate predictions and other visual artefacts to Datarock Core.", "c": "Nexus products are not currently visualised in Datarock Core. Customers are not able to perform QA/QC on some of our data, leading to a lack of confidence.", "score": 15, "status": "inflight", "mvp": "na", "d": 4, "e": 2, "f": 3, "g": 3, "evidence": {"source": "Strategic", "stat": "Customer confidence blocker", "tickets": [], "note": "Unlocks QA/QC on Nexus products. Required before Nexus UI Results tab can ship."}}, {"id": "panseg", "title": "Panoptic Segmentation - Depth Registration", "b": "Introduce a new model architecture for Depth Registration.", "c": "Panoptic Segmentation has been demonstrated to be a more performant depth registration approach. It identifies more features within the data.", "score": 15, "status": "inflight", "mvp": "na", "d": 4, "e": 2, "f": 3, "g": 3, "evidence": {"source": "Strategic", "stat": "ML model performance uplift", "tickets": [], "note": "Improves depth registration accuracy across all customers. Internal performance initiative."}}, {"id": "nexus-ui", "title": "Nexus Visualisations - UI Results tab", "b": "We now have more products that can be visualised in Datarock Core.", "c": "We need a scalable and appropriate way to visualise the many current and future products available in Datarock Core.", "score": 16, "status": "prev-comm", "mvp": "na", "d": 4, "e": 3, "f": 3, "g": 3, "evidence": {"source": "Strategic", "stat": "Follows from Nexus infrastructure", "tickets": [], "note": "Addresses Results Visualisation theme (HubSpot #4, 9 tickets). Requires Nexus Infra to ship first."}}, {"id": "acquire-out", "title": "acQuire - Data Out", "b": "We can get output data from Datarock Core using the acQuire Connector.", "c": "Datarock customers who use acQuire currently have to manually handle output data between the systems, including scheduled jobs.", "score": 16, "status": "prev-comm", "mvp": "na", "d": 3, "e": 3, "f": 3, "g": 4, "evidence": {"source": "Strategic", "stat": "Commercial integration completion", "tickets": [], "note": "Completes the acQuire bidirectional connector. Pipeline commitment."}}, {"id": "data-archiving", "title": "Data Archiving", "b": "Archive redundant data from bloated databases to restore platform performance and stability at scale.", "c": "Bloated databases are causing the platform to slow down and become unresponsive when customers load projects with large hole counts. Data archiving is the unlock.", "score": 16, "status": "prev-comm", "mvp": "na", "d": 5, "e": 3, "f": 2, "g": 4, "evidence": {"source": "CS Memo", "stat": "CS Memo Priority 1 - page freeze at 500+ holes", "tickets": [], "note": "Stable bulk hole viewing was the #2 must-have requirement in the May 2026 CS Memo. Root cause fix."}}, {"id": "nexus-behaviour", "title": "Nexus product behaviour - align platform infra", "b": "Resolve the mixed-state architecture between Nexus products and platform products across the product run menu, config editor, Nexus Products page, and Features page.", "c": "Nexus and platform products are treated differently in code and UI across multiple surfaces. Every customer-facing improvement in this area either adds conditional logic that needs rewriting later, or stalls waiting on foundational work that is not yet scheduled.", "score": 12, "status": "prev-comm", "mvp": "na", "d": 4, "e": 2, "f": 2, "g": 2, "evidence": {"source": "Internal", "stat": "Architecture alignment", "tickets": [], "note": "Technical debt item. No direct customer ticket. Required to avoid compounding mixed-state code as Nexus products scale."}}, {"id": "security-audit", "title": "IMDEX security audit - remediate Defender findings", "b": "Triage and resolve ~270 critical, high, and medium security issues identified across Datarock Core services via Microsoft Defender.", "c": "A Microsoft Defender scan has surfaced ~270 critical, high, and medium severity issues. Left unresolved, these represent both a security risk and a compliance exposure for IMDEX.", "score": 16, "status": "backlog", "mvp": "na", "d": 5, "e": 2, "f": 3, "g": 3, "evidence": {"source": "Compliance", "stat": "~270 findings - July deadline", "tickets": [], "note": "Critical/High/Medium Defender findings must be resolved or have approved exemptions by July. Compliance obligation - not customer-led."}}, {"id": "depth-reg", "title": "Depth Registration Editing", "b": "Edit depth values assigned to core analysis results after registration.", "c": "When Datarock Core registers depth incorrectly, there is no way to fix it without starting over - blocking confidence in every downstream result.", "score": 17, "status": "backlog", "mvp": "mvp2", "d": 5, "e": 3, "f": 3, "g": 3, "evidence": {"source": "HubSpot", "stat": "#1 HubSpot theme - 15 tickets - 8 accounts", "tickets": [], "note": "CS Memo: 42 Product improvement tickets in depth registration/imaging cluster, median age 199 days. Consistently the most-requested item across accounts."}}, {"id": "result-lifecycle", "title": "Daily Logging - Result lifecycle (draft, approved, locked)", "b": "Introduce explicit result lifecycle states so customers can mark validated results as approved or locked, receive clear signals when a re-run is needed, and confirm before a re-run consumes entitlement metres.", "c": "Once a result is processed, there is no way to mark it as final or protect it from being changed. Customers end up trusting stale indicators, seeing validated results silently overwritten, and accidentally triggering re-runs with no confirmation step.", "score": 17, "status": "backlog", "mvp": "mvp3", "d": 4, "e": 3, "f": 3, "g": 4, "evidence": {"source": "Multiple", "stat": "4 named accounts - 5 related tickets", "tickets": ["#24522762511 - AGA - Lock Changes option request", "#22497133731 - Internal - results tab shows stale green tick", "#119704704489 - Evolution - Hole View shows green when re-run needed", "#123828460020 - Gold Fields - partial re-run silently skipped holes", "#253695105495 - Internal - 2,000m burned by accidental Select All rerun"], "note": "Three distinct failure modes all trace to the same missing primitive: a finalised result state."}}, {"id": "incremental", "title": "Daily Logging - Incremental processing for continuous logging", "b": "Run analysis only on new incoming data, rather than re-triggering across the full dataset each time new core arrives.", "c": "In active drilling projects where core data arrives daily, there is no way to lock validated intervals and process only the new incoming batch. The workflow requires re-triggering across the full dataset each time.", "score": 17, "status": "backlog", "mvp": "mvp3", "d": 4, "e": 3, "f": 3, "g": 4, "evidence": {"source": "Multiple", "stat": "Active drilling workflow request - AGA and Evolution", "tickets": ["#24522762511 - AGA - lock previously processed data in daily logging workflow"], "note": "Directly related to the result lifecycle ticket cluster. Continuous logging customers need incremental processing to avoid re-triggering the full pipeline daily."}}, {"id": "bulk-downloads", "title": "Bulk Operations - Downloads", "b": "Allow users to select and download data across hundreds of holes in a single request without the system failing.", "c": "When users try to export data at scale, the system falls over - forcing them to manually break the request into smaller batches or raise a dev ticket just to get data out.", "score": 16, "status": "backlog", "mvp": "mvp1", "d": 4, "e": 3, "f": 3, "g": 3, "evidence": {"source": "CS Memo", "stat": "CS Memo Priority 1 - export median pipeline age 517 days", "tickets": [], "note": "Reliable data export was the #1 must-have requirement in the May 2026 CS Memo. CS team manually fulfilling download requests as workaround."}}, {"id": "hard-capping", "title": "Subscription & Entitlements - credit reservation and hard capping", "b": "Reserve entitlement metres at job acceptance rather than at completion, so concurrent jobs cannot collectively exceed the customer's allocation.", "c": "There is no reservation step between check and run, so the balance is meaningless as a control. This is a current production problem and can be fixed against the existing entitlement store.", "score": 15, "status": "backlog", "mvp": "na", "d": 4, "e": 3, "f": 3, "g": 2, "evidence": {"source": "Production", "stat": "Active production overrun - revenue exposure", "tickets": [], "note": "Customers can already exceed their allocation in production. Race condition between concurrent jobs. Fix is independent of any third-party entitlement platform."}}, {"id": "csv-input", "title": "Bulk Operations - 1 CSV for input data", "b": "Allow one CSV file for a given input data set rather than requiring individual files per hole.", "c": "Clients typically have all drill hole data in one file. Having to create individual files for each drill hole is tedious and can take a full day.", "score": 15, "status": "backlog", "mvp": "mvp1", "d": 4, "e": 3, "f": 3, "g": 2, "evidence": {"source": "CS Memo", "stat": "26 data upload/ingestion requests - largest feature category", "tickets": [], "note": "Data upload and ingestion was the largest feature-request category in the May 2026 CS Memo. Part of HubSpot Bulk Operations cluster (#2 theme, 12 tickets)."}}, {"id": "global-notif", "title": "Global Notifications (Project Level error or warning summary)", "b": "The notification pane on the Project Page should surface issues across all holes, not say no notifications when problems exist.", "c": "It is quite tedious to have to go into each individual drill hole to know what needs to be fixed. Customers would benefit from having all the information about all issues up front.", "score": 15, "status": "backlog", "mvp": "mvp1", "d": 4, "e": 3, "f": 3, "g": 2, "evidence": {"source": "HubSpot", "stat": "#6 HubSpot theme - 8 tickets - Notification & Error UX cluster", "tickets": [], "note": "CS Memo: 22 Product improvement tickets on UI/usability themes. Notification gaps consistently flagged across multiple accounts."}}, {"id": "simplify-filters", "title": "Simplify filters on Drill Hole page", "b": "Redesign the drill hole page filter experience so users can easily find the holes they need without complex filter logic.", "c": "Getting the drill hole page to show what you actually want requires working out the right combination of filter conditions. Replace with named task views so the logic lives in the product, not the user's head.", "score": 15, "status": "backlog", "mvp": "mvp1", "d": 4, "e": 3, "f": 3, "g": 2, "evidence": {"source": "CS Memo", "stat": "CS Memo Priority 2 - 20 Usability issues tag occurrences", "tickets": [], "note": "Recurring usability feedback across HubSpot pipeline. CS Memo calls out improved search and filtering, wildcard search, and clearer navigation."}}, {"id": "bulk-multiselect", "title": "Bulk Operations - Multi Select", "b": "Multi-select and act on multiple drill holes in one step.", "c": "At enterprise scale, doing everything one-at-a-time costs hours of repetitive work and makes the platform feel unfit for serious operations.", "score": 14, "status": "backlog", "mvp": "mvp2", "d": 3, "e": 3, "f": 3, "g": 2, "evidence": {"source": "HubSpot", "stat": "#2 HubSpot theme - 12 tickets (Bulk Operations cluster)", "tickets": [], "note": "CS Memo Priority 2: process very large numbers of holes without selecting them individually. CS team currently uses a manual script as workaround."}}, {"id": "mastersheet", "title": "Subscription & Entitlements - Mastersheet alternative", "b": "Replace the subscription master sheet with a configurable in-platform alternative.", "c": "The master sheet has 1,245 rows and is extremely wide. Manual management has already caused entitlement errors requiring Dev intervention.", "score": 14, "status": "backlog", "mvp": "na", "d": 4, "e": 2, "f": 2, "g": 4, "evidence": {"source": "Internal", "stat": "1,245-row master sheet - entitlement errors in production", "tickets": [], "note": "Operational risk item. Manual management has caused customer-facing entitlement errors requiring Dev intervention."}}, {"id": "tech-eval-graphs", "title": "Self-serve access to tech evaluation graphs", "b": "Make the graphs produced during tech evaluations available to customers directly in the platform, rather than only during facilitated demos.", "c": "Customers consistently ask for these graphs after go-live, which creates ongoing service overhead and signals a self-serve gap at the point customers are building internal confidence.", "score": 14, "status": "backlog", "mvp": "mvp2", "d": 3, "e": 3, "f": 3, "g": 2, "evidence": {"source": "CS Memo", "stat": "Consistent post-go-live request - CS service overhead", "tickets": [], "note": "CS Memo: customers frequently ask for these graphs after go-live. Graphs exist but are only accessible during facilitated sessions."}}, {"id": "customer-dashboard", "title": "Customer usage and entitlement dashboard", "b": "Extend the existing per-plan usage view beyond the consumption counter to include utilisation trends, days remaining, and engagement data.", "c": "Customers can see current consumption but cannot tell whether they are on track, accelerating, or at risk - making it hard to plan or make the case for renewal.", "score": 14, "status": "backlog", "mvp": "mvp2", "d": 3, "e": 3, "f": 2, "g": 4, "evidence": {"source": "CS Memo", "stat": "Customer transparency request - renewal confidence gap", "tickets": [], "note": "Extends the existing usage view (already in platform). CS Memo: customers need visibility to manage subscription and justify renewal."}}, {"id": "dm-reliability", "title": "Data Manager reliability and self-service recovery", "b": "Improve Data Manager infrastructure resiliency to reduce unexplained failures and give customers a way to diagnose and re-trigger failed processing without raising a support ticket.", "c": "When Data Manager fails, customers hit a dead end - the error says contact support, gives no reason, or does not surface at all. Volume and spread across customers suggests a reliability problem, not edge cases.", "score": 15, "status": "backlog", "mvp": "mvp2", "d": 4, "e": 3, "f": 3, "g": 2, "evidence": {"source": "Help Desk", "stat": "39 DM failure tickets - largest operational burden", "tickets": [], "note": "39 tickets across multiple accounts and hole types - largest single operational category in the help desk analysis. Every failure converts to a support ticket."}}, {"id": "leapfrog", "title": "Connectors - Leapfrog", "b": "Develop a Datarock Core Leapfrog connector.", "c": "Leapfrog is a primary geological modelling tool for many of our customers - but Datarock analysis results have to be manually exported and re-imported to get them into a Leapfrog model.", "score": 14, "status": "backlog", "mvp": "mvp3", "d": 3, "e": 3, "f": 2, "g": 4, "evidence": {"source": "CS Memo", "stat": "CS Memo Priority 2 - core geological workflow gap", "tickets": [], "note": "CS Memo: customers have no direct way to navigate from Leapfrog to Datarock Core. Leapfrog is a daily tool for most geology teams."}}, {"id": "plan-config", "title": "Subscription & Entitlements - plan configuration", "b": "Admin tooling to configure and manage customer subscription plans without requiring developer or ops intervention.", "c": "Setting up or changing a customer's plan currently requires manual effort from the ops or dev team. Every new customer, upgrade, or mid-term adjustment becomes a co-ordination overhead.", "score": 14, "status": "backlog", "mvp": "na", "d": 4, "e": 3, "f": 2, "g": 3, "evidence": {"source": "Internal", "stat": "Ops/commercial enabler - no direct customer ticket", "tickets": [], "note": "Every new customer onboarding and plan change requires Dev or Ops intervention. Internal commercial operations bottleneck."}}, {"id": "depth-ranges", "title": "User-defined depth ranges for processing", "b": "Allow users to specify which depth intervals to run processing on within a hole, rather than processing the full hole each time.", "c": "Customers do not always need the full hole processed. Without depth range control, customers process more than they need to.", "score": 14, "status": "backlog", "mvp": "mvp3", "d": 4, "e": 2, "f": 2, "g": 4, "evidence": {"source": "HubSpot", "stat": "Geotechnical and geological workflow request", "tickets": [], "note": "Geotechnical: rubble at start of hole makes full processing redundant. Geological: only specific lithology change intervals are relevant."}}, {"id": "rtu", "title": "Rights to Use (RTU) - in-platform tracking at project and company level", "b": "Add an RTU status field at company and project level, visible to internal users, with supporting metadata (source, date confirmed, notes) and queryable by ML pipelines to programmatically include or exclude projects from model workflows.", "c": "RTU is currently tracked in a spreadsheet and identified in HubSpot at deal level - neither of which is where internal users make project-level decisions, and neither of which ML pipelines can query directly. Without RTU as first-class platform metadata, there is no reliable programmatic way to confirm whether customer imagery is eligible for model training, evaluation, or sampling.", "score": 13, "status": "backlog", "mvp": "mvp3", "d": 4, "e": 2, "f": 2, "g": 3, "evidence": {"source": "Multiple", "stat": "HubSpot feedback ticket + ML pipeline requirement", "tickets": ["#HubSpot 22 Jun 2026 - Move Rights to Use tracking into platform at project/company level"], "note": "Currently managed via spreadsheet and HubSpot deal-level flags. Neither supports programmatic ML pipeline queries. Compliance risk grows as the model programme scales."}}, {"id": "connectors-consolidation", "title": "Connectors - consolidation", "b": "Consolidate all integrations into a consistent flow (Upload images from this PC, Imago, etc.).", "c": "Every data source has its own flow - uploading from a local PC works differently to pushing from Imago, and each new integration adds another pattern to learn.", "score": 13, "status": "backlog", "mvp": "mvp3", "d": 3, "e": 3, "f": 2, "g": 3, "evidence": {"source": "Strategic", "stat": "Integration framework - reduces per-connector overhead", "tickets": [], "note": "Each new connector currently requires its own bespoke implementation. Consolidation reduces build cost and improves consistency."}}, {"id": "image-api", "title": "Image Import via Public API", "b": "Allow images to be sent to Datarock Core via the Public API.", "c": "More customers are automating their workflows through Datarock Core's public API but currently cannot send data via the API.", "score": 12, "status": "backlog", "mvp": "mvp2", "d": 2, "e": 3, "f": 2, "g": 3, "evidence": {"source": "Strategic", "stat": "API automation customer request", "tickets": [], "note": "Emerging request from customers building automated workflows via the public API. Not in top HubSpot themes - more engineering and API-led."}}, {"id": "drill-search", "title": "Bulk Operations - Drill Hole search", "b": "Provide more options when searching for drill holes, including wildcard search and paste list.", "c": "Customers often need to apply an action to multiple disparate drill holes. Doing this one-at-a-time costs hours and can easily lead to getting lost in the system.", "score": 12, "status": "backlog", "mvp": "mvp1", "d": 3, "e": 3, "f": 2, "g": 2, "evidence": {"source": "HubSpot", "stat": "#2 HubSpot theme - Bulk Operations cluster - 12 tickets", "tickets": [], "note": "CS Memo: customers need wildcard search and paste-list options for multi-hole selection. Part of the broader Bulk Operations theme."}}, {"id": "task-based", "title": "Task-based issue resolution", "b": "Replace the current hole-by-hole navigation model with a task-focused UI that surfaces issues across the whole project.", "c": "Finding and fixing issues today means navigating into each hole, checking each product, identifying the problem, then backing out and repeating. At any meaningful scale this is unworkable.", "score": 12, "status": "backlog", "mvp": "mvp3", "d": 2, "e": 3, "f": 2, "g": 3, "evidence": {"source": "CS Memo", "stat": "Scale usability gap - CS workflow observation", "tickets": [], "note": "Identified through CS team workflow observations and usability feedback. Reflects a structural navigation problem at scale."}}, {"id": "move-projects", "title": "Bulk Operations - move data between projects", "b": "Allow users to move holes from one project to another.", "c": "Data has been uploaded to the wrong project and the process currently has to be done outside the platform - downloading holes and metadata, uploading to the new project, then deleting from the original.", "score": 12, "status": "backlog", "mvp": "mvp2", "d": 3, "e": 3, "f": 2, "g": 2, "evidence": {"source": "HubSpot", "stat": "Wrong-project upload incidents - CS intervention required", "tickets": [], "note": "Current workaround requires CLI or S3 browser access. CS team intervenes to shift data for customers."}}, {"id": "nexus-platform-products", "title": "Nexus product behaviour - platform products", "b": "Establish consistent product behaviour across the Nexus Products page, Features page, config editor, and Product Run menu so Nexus products are treated the same as platform products in the UI.", "c": "The UI does not yet understand schema-driven dependencies, and the mixed state means every customer-facing improvement in this area either adds conditional logic that needs rewriting later, or waits on foundational work that is not yet scheduled.", "score": 10, "status": "backlog", "mvp": "na", "d": 4, "e": 2, "f": 1, "g": 2, "evidence": {"source": "Internal", "stat": "UI surface layer - depends on Nexus infra alignment", "tickets": [], "note": "Follows from the Previously communicated Nexus infra alignment work. No direct customer ticket - internal product consistency requirement."}}, {"id": "sub-alerts", "title": "Subscription & Entitlements - usage alerts and thresholds", "b": "In-platform notifications at 50%, 75%, 90% of allocated metres per product.", "c": "We do not proactively inform customers on how they are tracking against their subscription. Alerts will improve adoption and management of customer subscriptions.", "score": 11, "status": "backlog", "mvp": "mvp1", "d": 2, "e": 3, "f": 2, "g": 2, "evidence": {"source": "HubSpot", "stat": "HubSpot #9 theme - Subscription & Entitlements cluster - 6 tickets", "tickets": [], "note": "Customers find out they are near their limit reactively rather than through proactive platform communication."}}, {"id": "hole-id", "title": "Hole ID and Box Numbers", "b": "Manage and edit hole identifiers and physical box numbering across a project.", "c": "When hole IDs or box numbers are entered incorrectly or naming conventions change, there is no clean way to fix them - errors propagate through the whole project.", "score": 11, "status": "backlog", "mvp": "mvp2", "d": 2, "e": 3, "f": 2, "g": 2, "evidence": {"source": "HubSpot", "stat": "#7 HubSpot theme - 7 tickets - naming convention requests", "tickets": [], "note": "Naming convention changes, corrections after upload, and renaming across projects all require manual CS or Ops intervention today."}}, {"id": "internal-dashboard", "title": "Internal usage intelligence dashboard", "b": "Operational dashboard for CS, Sales, Support, and Product providing customer health scores, renewal risk indicators, and expansion signals.", "c": "CS and Sales are managing accounts reactively with no consolidated view of customer health - renewal conversations happen on instinct and expansion opportunities go unspotted.", "score": 11, "status": "backlog", "mvp": "na", "d": 2, "e": 2, "f": 2, "g": 3, "evidence": {"source": "Internal", "stat": "CS/Sales operational tooling - Power BI prototype exists", "tickets": [], "note": "Proposed by CS Lead in May 2026 memo. Existing Power BI prototype validates the data is accessible. Internal operational tool - not customer-facing."}}, {"id": "design-system", "title": "Design system - adopt IMDEX shared UI components", "b": "Begin migrating Datarock Core UI to the IMDEX design system, built on shadcn.", "c": "Datarock Core runs its own component patterns independently of the broader IMDEX design system. As the products converge, the inconsistency becomes increasingly visible and expensive to maintain.", "score": 11, "status": "backlog", "mvp": "na", "d": 2, "e": 3, "f": 2, "g": 2, "evidence": {"source": "Internal", "stat": "IMDEX platform alignment - no customer ticket", "tickets": [], "note": "Internal platform maturity item. No direct customer request. Required for coherent cross-product experience as IMDEX products converge."}}, {"id": "imago", "title": "Imago Integration", "b": "Link Datarock analysis results directly to imagery in Imago's viewer.", "c": "My geologists use Imago as their primary image viewer, but I cannot connect Datarock results to it - forcing manual reconciliation between two systems.", "score": 10, "status": "backlog", "mvp": "mvp3", "d": 2, "e": 3, "f": 1, "g": 3, "evidence": {"source": "HubSpot", "stat": "#8 HubSpot theme - 7 tickets across multiple accounts", "tickets": [], "note": "Imago is the primary image viewer for geology teams at several accounts. Manual reconciliation between Datarock outputs and Imago today."}}, {"id": "user-profile", "title": "User profile settings", "b": "A self-service profile settings area where users can manage personal preferences - notification email address, communication opt-ins, and other account-level configuration.", "c": "Users have no control over how or where the platform communicates with them. Notifications go to the email used at signup and there is no way to opt in or out of different communication types.", "score": 10, "status": "backlog", "mvp": "mvp1", "d": 2, "e": 3, "f": 2, "g": 1, "evidence": {"source": "HubSpot", "stat": "Communication preference requests - multiple accounts", "tickets": [], "note": "Users managing multiple addresses or wanting to route platform notifications separately have no self-service option. Basic SaaS expectation."}}, {"id": "auth-case", "title": "Auth Case Sensitivity", "b": "Case-insensitive email matching across all auth and invite flows.", "c": "I get locked out or confused when my email case does not match what was registered - a trust-destroying first impression for every new user.", "score": 9, "status": "backlog", "mvp": "mvp1", "d": 3, "e": 3, "f": 1, "g": 1, "evidence": {"source": "HubSpot", "stat": "#12 HubSpot theme - 4 tickets", "tickets": [], "note": "First-session failure for new users whose invite email case does not match their registered case. Low effort fix - high trust impact."}}, {"id": "iterable-ids", "title": "Remove iterable IDs", "b": "Replace sequential integer IDs on projects and companies with UUIDs.", "c": "Sequential IDs let anyone enumerate records or infer platform scale by incrementing a number - a security and trust risk. UUIDs are industry standard.", "score": 6, "status": "backlog", "mvp": "na", "d": 1, "e": 2, "f": 1, "g": 1, "evidence": {"source": "Internal", "stat": "Security best practice - no customer ticket", "tickets": [], "note": "Identified internally as a security hygiene gap. No customer has raised this directly. Standard SaaS practice."}}];
+const CUT1_DEFAULT = {"july": ["acquire-in", "nexus-infra", "panseg", "security-audit", "data-archiving"], "q1": ["nexus-ui", "acquire-out", "nexus-behaviour", "bulk-downloads", "csv-input", "global-notif", "simplify-filters"], "q2": ["hard-capping", "depth-reg", "bulk-multiselect", "dm-reliability", "drill-search"], "q3": ["result-lifecycle", "incremental", "rtu", "nexus-platform-products", "mastersheet", "tech-eval-graphs", "customer-dashboard", "leapfrog", "plan-config", "depth-ranges", "connectors-consolidation", "image-api", "task-based", "move-projects", "sub-alerts", "hole-id", "internal-dashboard", "design-system", "imago", "user-profile", "auth-case", "iterable-ids"]};
+const CUT2_DEFAULT = {"july": ["acquire-in", "nexus-infra", "panseg", "security-audit", "data-archiving"], "q1": ["nexus-ui", "acquire-out", "nexus-behaviour", "depth-reg", "result-lifecycle", "incremental"], "q2": ["bulk-downloads", "hard-capping", "csv-input", "global-notif", "simplify-filters", "bulk-multiselect", "dm-reliability"], "q3": ["rtu", "nexus-platform-products", "mastersheet", "tech-eval-graphs", "customer-dashboard", "leapfrog", "plan-config", "depth-ranges", "connectors-consolidation", "image-api", "drill-search", "task-based", "move-projects", "sub-alerts", "hole-id", "internal-dashboard", "design-system", "imago", "user-profile", "auth-case", "iterable-ids"]};
+var __SAVED__ = null;
+
+const itemMap = {};
+ITEMS.forEach(it => itemMap[it.id] = it);
+
+const statusLabel = s => ({inflight:'In-flight','prev-comm':'Prev. committed',backlog:'Backlog'})[s]||s;
+const statusPill  = s => ({inflight:'pill-inflight','prev-comm':'pill-prevcomm',backlog:'pill-backlog'})[s]||'pill-backlog';
+const mvpLabel    = m => ({mvp1:'MVP 1',mvp2:'MVP 2',mvp3:'MVP 3',na:'n.a'})[m]||'n.a';
+const mvpPill     = m => ({mvp1:'pill-mvp1',mvp2:'pill-mvp2',mvp3:'pill-mvp3',na:'pill-na'})[m]||'pill-na';
+const evClass     = s => ({'HubSpot':'ev-HubSpot','CS Memo':'ev-CsMemo','Help Desk':'ev-HelpDesk','Production':'ev-Production','Compliance':'ev-Compliance','Strategic':'ev-Strategic','Internal':'ev-Internal','Multiple':'ev-Multiple'})[s]||'ev-Internal';
+
+function makeCard(item) {
+  const div = document.createElement('div');
+  div.className = 'card'; div.dataset.id = item.id; div.dataset.status = item.status;
+  div.innerHTML = `<div class="card-top"><div class="card-title">${item.title}</div><div class="card-score">${item.score}</div></div><div class="card-pills"><span class="pill ${statusPill(item.status)}">${statusLabel(item.status)}</span><span class="pill ${mvpPill(item.mvp)}">${mvpLabel(item.mvp)}</span></div>`;
+  div.addEventListener('click', () => openModal(item.id));
+  return div;
+}
+
+function clearEl(id) { const el = document.getElementById(id); if(el) el.innerHTML = ''; }
+
+function buildRanking() {
+  clearEl('rank-inflight'); clearEl('rank-prevcomm'); clearEl('rank-backlog');
+  const groups = {inflight:[],'prev-comm':[],backlog:[]};
+  ITEMS.forEach(it => { if(groups[it.status]) groups[it.status].push(it); });
+  const ids = {inflight:'rank-inflight','prev-comm':'rank-prevcomm',backlog:'rank-backlog'};
+  Object.entries(groups).forEach(([s,list]) => {
+    list.sort((a,b) => b.score-a.score);
+    const el = document.getElementById(ids[s]);
+    if(el) list.forEach(it => el.appendChild(makeCard(it)));
+  });
+}
+
+function populateCut(colMap, prefix) {
+  ['july','q1','q2','q3'].forEach(col => {
+    clearEl('col-'+prefix+'-'+col);
+    const el = document.getElementById('col-'+prefix+'-'+col);
+    (colMap[col]||[]).forEach(id => { const it=itemMap[id]; if(it&&el) el.appendChild(makeCard(it)); });
+  });
+}
+
+function buildOpen(savedOpen) {
+  ['pool','july','q1','q2','q3'].forEach(col => clearEl('col-open-'+col));
+  if(savedOpen) {
+    ['pool','july','q1','q2','q3'].forEach(col => {
+      const el = document.getElementById('col-open-'+col);
+      (savedOpen[col]||[]).forEach(id => { const it=itemMap[id]; if(it&&el) el.appendChild(makeCard(it)); });
+    });
+  } else {
+    const pool = document.getElementById('col-open-pool');
+    [...ITEMS].sort((a,b) => { const tier=s=>s==='inflight'?0:s==='prev-comm'?1:2; const td=tier(a.status)-tier(b.status); return td!==0?td:b.score-a.score; }).forEach(it => pool.appendChild(makeCard(it)));
+  }
+}
+
+function initSortables() {
+  document.querySelectorAll('.card-list').forEach(el => { Sortable.create(el,{group:'cards',animation:150,ghostClass:'sortable-ghost',onEnd:handleLayoutChange}); });
+}
+
+function openModal(id) {
+  const item = itemMap[id]; if(!item) return;
+  const ev = item.evidence||{};
+  document.getElementById('modal-title').textContent = item.title;
+  document.getElementById('modal-b').textContent = item.b;
+  document.getElementById('modal-c').textContent = item.c;
+  document.getElementById('modal-pills').innerHTML = `<span class="pill ${statusPill(item.status)}">${statusLabel(item.status)}</span><span class="pill ${mvpPill(item.mvp)}">${mvpLabel(item.mvp)}</span>`;
+  const badge = document.getElementById('modal-ev-badge');
+  badge.textContent = ev.source||'Unknown'; badge.className='ev-badge '+evClass(ev.source||'');
+  document.getElementById('modal-ev-stat').textContent = ev.stat||'';
+  const ticketsEl = document.getElementById('modal-ev-tickets'); ticketsEl.innerHTML='';
+  (ev.tickets||[]).forEach(t => { const span=document.createElement('span'); span.className='ticket-ref'; span.textContent=t; ticketsEl.appendChild(span); });
+  document.getElementById('modal-ev-note').textContent = ev.note||'';
+  document.getElementById('modal-scores').innerHTML = `<div class="modal-score-chip">Score <strong>${item.score}</strong>/23</div><div class="modal-score-chip">Not doing <strong>${item.d||'--'}</strong>/5</div><div class="modal-score-chip">UX <strong>${item.e||'--'}</strong>/3</div><div class="modal-score-chip">FY27 rev <strong>${item.f||'--'}</strong>/5 x2</div><div class="modal-score-chip">FY28 rev <strong>${item.g||'--'}</strong>/5</div>`;
+  document.getElementById('modal').removeAttribute('hidden');
+}
+function closeModal() { document.getElementById('modal').setAttribute('hidden',''); }
+document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='vote') initVoteTab();
+}
+
+function readColState(prefix, cols) {
+  const state={};
+  cols.forEach(col=>{ const el=document.getElementById('col-'+prefix+'-'+col); state[col]=el?Array.from(el.querySelectorAll('.card')).map(c=>c.dataset.id):[]; });
+  return state;
+}
+
+function saveStateAsHTML() {
+  const state={cut1:readColState('cut1',['july','q1','q2','q3']),cut2:readColState('cut2',['july','q1','q2','q3']),open:readColState('open',['pool','july','q1','q2','q3'])};
+  let html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  html=html.replace(/var __SAVED__ = .*?;/,'var __SAVED__ = '+JSON.stringify(state)+';');
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  const d=new Date(); const stamp=d.toISOString().slice(0,10)+'_'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');
+  a.download='datarock_fy27_roadmap_'+stamp+'.html';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(a.href);
+  const ind=document.getElementById('save-indicator'); ind.classList.add('show'); setTimeout(()=>ind.classList.remove('show'),2000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VOTE TAB
+// ═══════════════════════════════════════════════════════════════════════════
+const DB_URL   = 'https://q1fy27planning-default-rtdb.firebaseio.com';
+const DB_PATH  = 'fy27q1votes';
+const DB_LAYOUT = 'fy27q1layout';
+const VOTERS   = [{id:'liam',label:'Liam'},{id:'emma',label:'Emma'},{id:'tomp',label:'Tom P'},{id:'tomc',label:'Tom C'},{id:'graeme',label:'Graeme'}];
+const ABOVE_LINE = ["acquire-in", "nexus-infra", "panseg", "security-audit", "data-archiving", "nexus-ui", "acquire-out", "nexus-behaviour", "bulk-downloads", "csv-input", "global-notif", "simplify-filters", "hard-capping", "depth-reg", "bulk-multiselect", "dm-reliability", "drill-search"];
+const BELOW_LINE = ["result-lifecycle", "incremental"];
+const NOT_IN_PLAN_IDS = ["mastersheet", "tech-eval-graphs", "customer-dashboard", "leapfrog", "plan-config", "depth-ranges", "rtu", "connectors-consolidation", "image-api", "task-based", "move-projects", "nexus-platform-products", "sub-alerts", "hole-id", "internal-dashboard", "design-system", "imago", "user-profile", "auth-case", "iterable-ids"];
+
+let currentVoter  = null;
+let allVotes      = {};
+let voteTabBuilt  = false;
+let voteTabInited = false;
+let pollTimer     = null;
+
+// Firebase REST helpers
+async function fbRead() {
+  try {
+    const r = await fetch(`${DB_URL}/${DB_PATH}.json`);
+    if(!r.ok) throw new Error(r.status);
+    return (await r.json()) || {};
+  } catch(e) { console.error('FB read:', e); return null; }
+}
+async function fbWrite(voter, itemId, data) {
+  try {
+    await fetch(`${DB_URL}/${DB_PATH}/${voter}/${itemId}.json`, {method:'PUT', body:JSON.stringify(data), headers:{'Content-Type':'application/json'}});
+  } catch(e) { console.error('FB write:', e); }
+}
+async function fbRemove(voter, itemId) {
+  try { await fetch(`${DB_URL}/${DB_PATH}/${voter}/${itemId}.json`, {method:'DELETE'}); }
+  catch(e) { console.error('FB delete:', e); }
+}
+
+
+// Layout Firebase helpers
+async function fbReadLayout() {
+  try {
+    const r = await fetch(`${DB_URL}/${DB_LAYOUT}.json`);
+    if(!r.ok) throw new Error(r.status);
+    return (await r.json()) || {};
+  } catch(e) { console.error('FB layout read:', e); return null; }
+}
+async function fbWriteLayout(section, colMap) {
+  try {
+    await fetch(`${DB_URL}/${DB_LAYOUT}/${section}.json`, {method:'PUT', body:JSON.stringify(colMap), headers:{'Content-Type':'application/json'}});
+  } catch(e) { console.error('FB layout write:', e); }
+}
+
+// Apply a Firebase layout to the DOM (move/create cards without destroying SortableJS)
+function applyLayout(prefix, colMap, cols) {
+  // Build a pool of existing card DOM nodes for this section
+  const pool = {};
+  cols.forEach(col => {
+    const el = document.getElementById('col-'+prefix+'-'+col);
+    if(!el) return;
+    Array.from(el.querySelectorAll('.card')).forEach(c => { pool[c.dataset.id] = c; });
+  });
+
+  // Check if anything actually changed
+  let changed = false;
+  cols.forEach(col => {
+    const el = document.getElementById('col-'+prefix+'-'+col); if(!el) return;
+    const cur = Array.from(el.querySelectorAll('.card')).map(c=>c.dataset.id);
+    const nxt = colMap[col]||[];
+    if(JSON.stringify(cur)!==JSON.stringify(nxt)) changed=true;
+  });
+  if(!changed) return;
+
+  // Reorder: clear containers and reinsert in order, reusing existing nodes
+  cols.forEach(col => {
+    const el = document.getElementById('col-'+prefix+'-'+col); if(!el) return;
+    el.innerHTML='';
+    (colMap[col]||[]).forEach(id => {
+      const card = pool[id] || makeCard(itemMap[id]);
+      if(card) el.appendChild(card);
+    });
+  });
+}
+
+// Sync layout from Firebase and apply
+async function syncLayout() {
+  const layout = await fbReadLayout();
+  if(!layout) return;
+  if(layout.cut1) applyLayout('cut1', layout.cut1, ['july','q1','q2','q3']);
+  if(layout.cut2) applyLayout('cut2', layout.cut2, ['july','q1','q2','q3']);
+  if(layout.open) applyLayout('open', layout.open, ['pool','july','q1','q2','q3']);
+}
+
+// Debounce helper for layout writes
+function debounce(fn, ms) {
+  let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a),ms); };
+}
+
+// Write layout for a section after a drag
+const handleLayoutChange = debounce(function(evt) {
+  const fromId = evt.from?.id||''; const toId = evt.to?.id||'';
+  const sections = new Set();
+  [fromId,toId].forEach(id=>{
+    if(id.startsWith('col-cut1-')) sections.add('cut1');
+    else if(id.startsWith('col-cut2-')) sections.add('cut2');
+    else if(id.startsWith('col-open-')) sections.add('open');
+  });
+  sections.forEach(section=>{
+    const cols = section==='open'?['pool','july','q1','q2','q3']:['july','q1','q2','q3'];
+    fbWriteLayout(section, readColState(section, cols));
+  });
+}, 600);
+
+// Vote helpers
+const getVote  = (v,id) => allVotes[v]?.[id] || null;
+const getSum   = id => VOTERS.reduce((s,v)=>(s+(getVote(v.id,id)?.rank||0)),0);
+const getCount = id => VOTERS.filter(v=>getVote(v.id,id)?.rank).length;
+const getFlags = id => VOTERS.filter(v=>getVote(v.id,id)?.flag).length;
+
+async function syncVotes() {
+  const fresh = await fbRead();
+  if(fresh !== null) {
+    allVotes = fresh;
+    if(voteTabBuilt) renderAllRows();
+  }
+  syncLayout();
+  const dot = document.getElementById('sync-dot');
+  const ts  = document.getElementById('sync-ts');
+  if(dot) { dot.classList.add('synced'); setTimeout(()=>dot.classList.remove('synced'),600); }
+  if(ts)  ts.textContent = 'Synced ' + new Date().toLocaleTimeString();
+}
+
+function buildVoteTab() {
+  if(voteTabBuilt) return;
+  voteTabBuilt = true;
+  const wrap = document.getElementById('vote-content');
+  if(!wrap) return;
+
+  wrap.innerHTML = `
+    <div class="vote-header">
+      <div class="vote-title-row">
+        <div>
+          <div class="narrative-eyebrow" style="margin-bottom:6px;">FY27 Q1 Planning &middot; Executive Vote</div>
+          <div class="vote-subtitle">Rank items 1&nbsp;(highest priority) to N&nbsp;(lowest). You can rank any item across all sections. Items <strong>above the line</strong> are the proposed Cut&nbsp;1 plan.</div>
+        </div>
+        <div class="sync-status">
+          <span class="sync-dot" id="sync-dot"></span>
+          <span class="sync-ts" id="sync-ts">Connecting...</span>
+        </div>
+      </div>
+      <div class="voter-bar">
+        <span class="voter-label">Voting as:</span>
+        <div class="voter-pills">
+          ${VOTERS.map(v=>`<button class="voter-pill" data-voter="${v.id}" onclick="selectVoter('${v.id}')">${v.label}</button>`).join('')}
+          <button class="voter-pill view-only" data-voter="" onclick="selectVoter('')">View only</button>
+        </div>
+        <button class="clear-votes-btn" id="clear-votes-btn" onclick="clearMyVotes()" style="display:none" title="Remove all my votes from Firebase">Clear my votes</button>
+      </div>
+    </div>
+    <div class="vote-table-wrap">
+      <table class="vote-table">
+        <thead>
+          <tr class="vote-thead">
+            <th class="th-num">#</th>
+            <th class="th-item">Item</th>
+            <th class="th-score">Score</th>
+            <th class="th-mvp">MVP</th>
+            ${VOTERS.map(v=>`<th class="th-voter" data-voter-head="${v.id}">${v.label}</th>`).join('')}
+            <th class="th-all">All</th>
+          </tr>
+        </thead>
+        <tbody id="vote-tbody"></tbody>
+      </table>
+    </div>
+    <div class="vote-legend">
+      <span>Lower sum = higher priority</span><span class="legend-sep">·</span>
+      <span><strong>?</strong> = flagged for discussion</span><span class="legend-sep">·</span>
+      <span>Numbers in ( ) = voter count</span><span class="legend-sep">·</span>
+      <span>Click any item title to view detail</span>
+    </div>`;
+
+  const tbody = document.getElementById('vote-tbody');
+  const sections = [
+    {label:`ABOVE THE LINE — Cut 1 (${ABOVE_LINE.length} items)`, ids:ABOVE_LINE, cls:'section-above'},
+    {label:`BELOW THE LINE — Cut 2 only (${BELOW_LINE.length} items)`, ids:BELOW_LINE, cls:'section-below'},
+    {label:`NOT IN PLAN (${NOT_IN_PLAN_IDS.length} items)`, ids:NOT_IN_PLAN_IDS, cls:'section-other'},
+  ];
+
+  let n=1;
+  sections.forEach(sec=>{
+    const hdr=document.createElement('tr'); hdr.className='section-row '+sec.cls;
+    hdr.innerHTML=`<td colspan="${4+VOTERS.length+1}">${sec.label}</td>`;
+    tbody.appendChild(hdr);
+    sec.ids.forEach(itemId=>{
+      const item=itemMap[itemId]; if(!item) return;
+      const tr=document.createElement('tr'); tr.id='vr-'+itemId; tr.className='vote-item-row'; tr.dataset.item=itemId;
+      tr.innerHTML=`
+        <td class="td-num">${n++}</td>
+        <td class="td-item" onclick="openModal('${itemId}')"><span class="vote-item-title">${item.title}</span></td>
+        <td class="td-score">${item.score}</td>
+        <td class="td-mvp"><span class="pill ${mvpPill(item.mvp)}">${mvpLabel(item.mvp)}</span></td>
+        ${VOTERS.map(v=>`<td class="td-voter" data-vc="${v.id}" data-ii="${itemId}">–</td>`).join('')}
+        <td class="td-all" data-ac data-ii="${itemId}">–</td>`;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+function renderAllRows() {
+  [...ABOVE_LINE,...BELOW_LINE,...NOT_IN_PLAN_IDS].forEach(renderRow);
+}
+
+function renderRow(itemId) {
+  const row = document.getElementById('vr-'+itemId); if(!row) return;
+  VOTERS.forEach(v=>{
+    const cell=row.querySelector(`[data-vc="${v.id}"]`); if(!cell) return;
+    const vote=getVote(v.id,itemId);
+    if(v.id===currentVoter){
+      cell.innerHTML=`<div class="vci"><input type="number" min="1" max="39" class="rank-input${vote?.flag?' fi':''}" value="${vote?.rank||''}" placeholder="–" onchange="handleRankChange('${itemId}',this.value)" /><button class="flag-btn${vote?.flag?' flagged':''}" onclick="handleFlag('${itemId}')" title="Flag for discussion">?</button></div>`;
+    } else {
+      if(vote?.rank) cell.innerHTML=`<span${vote?.flag?' class="vf"':''}>${vote.rank}${vote?.flag?' ?':''}</span>`;
+      else if(vote?.flag) cell.innerHTML=`<span class="vf">?</span>`;
+      else cell.textContent='–';
+    }
+  });
+  const ac=row.querySelector('[data-ac]'); if(!ac) return;
+  const sum=getSum(itemId),count=getCount(itemId),flags=getFlags(itemId);
+  if(sum>0||flags>0){
+    ac.innerHTML=(sum>0?`<strong>${sum}</strong> <span class="vc">(${count})</span>`:'')+( flags>0?` <span class="fi-badge">${flags}?</span>`:'');
+  } else { ac.textContent='–'; }
+}
+
+async function handleRankChange(itemId, value) {
+  if(!currentVoter) return;
+  const rank = value&&parseInt(value)>0?parseInt(value):null;
+  const flag  = getVote(currentVoter,itemId)?.flag||false;
+  if(!allVotes[currentVoter]) allVotes[currentVoter]={};
+  if(rank||flag){
+    const data={}; if(rank) data.rank=rank; if(flag) data.flag=true;
+    allVotes[currentVoter][itemId]=data; await fbWrite(currentVoter,itemId,data);
+  } else {
+    delete allVotes[currentVoter][itemId]; await fbRemove(currentVoter,itemId);
+  }
+  renderRow(itemId);
+}
+
+async function handleFlag(itemId) {
+  if(!currentVoter) return;
+  const prev=getVote(currentVoter,itemId); const newFlag=!(prev?.flag||false);
+  const rank=prev?.rank||null;
+  if(!allVotes[currentVoter]) allVotes[currentVoter]={};
+  if(rank||newFlag){
+    const data={}; if(rank) data.rank=rank; if(newFlag) data.flag=true;
+    allVotes[currentVoter][itemId]=data; await fbWrite(currentVoter,itemId,data);
+  } else {
+    delete allVotes[currentVoter][itemId]; await fbRemove(currentVoter,itemId);
+  }
+  renderRow(itemId);
+}
+
+function selectVoter(voterId){
+  currentVoter=voterId||null;
+  document.querySelectorAll('.voter-pill').forEach(p=>p.classList.toggle('active',p.dataset.voter===(voterId||'')));
+  const cb=document.getElementById('clear-votes-btn'); if(cb) cb.style.display=currentVoter?'':'none';
+  if(voteTabBuilt) renderAllRows();
+}
+
+async function clearMyVotes(){
+  if(!currentVoter||!confirm(`Clear all votes for ${VOTERS.find(v=>v.id===currentVoter)?.label}? This cannot be undone.`)) return;
+  delete allVotes[currentVoter];
+  try { await fetch(`${DB_URL}/${DB_PATH}/${currentVoter}.json`,{method:'DELETE'}); } catch(e){}
+  renderAllRows();
+}
+
+function initVoteTab(){
+  if(voteTabInited) return; voteTabInited=true;
+  buildVoteTab();
+  syncVotes();
+  pollTimer=setInterval(syncVotes,5000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+buildRanking();
+if(__SAVED__){
+  populateCut(__SAVED__.cut1||CUT1_DEFAULT,'cut1');
+  populateCut(__SAVED__.cut2||CUT2_DEFAULT,'cut2');
+  buildOpen(__SAVED__.open||null);
+} else {
+  populateCut(CUT1_DEFAULT,'cut1');
+  populateCut(CUT2_DEFAULT,'cut2');
+  buildOpen(null);
+}
+initSortables();
+syncLayout(); // initial layout sync from Firebase
+
+</script>
+</body>
+</html>
