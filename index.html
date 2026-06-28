@@ -183,8 +183,15 @@ h1,h2,h3,h4{font-family:var(--dr-font-display);line-height:1.15;}
 .flag-btn:hover{border-color:var(--dr-warning);color:var(--dr-warning);}
 .flag-btn.flagged{background:var(--dr-warning);border-color:var(--dr-warning);color:var(--dr-white);}
 .vf{color:var(--dr-warning);font-weight:700;}
-.vc{font-size:9px;color:var(--dr-text-muted);}
+
 .fi-badge{font-size:9px;color:var(--dr-warning);font-weight:700;}
+.vote-item-row.top-1{background:rgba(90,138,92,.22)!important;border-left:3px solid #3d6b3f;}
+.vote-item-row.top-2{background:rgba(90,138,92,.15)!important;}
+.vote-item-row.top-3{background:rgba(90,138,92,.10)!important;}
+.vote-item-row.top-4{background:rgba(90,138,92,.06)!important;}
+.vote-item-row.top-5{background:rgba(90,138,92,.03)!important;}
+.vote-item-row.top-1 .td-all{color:#3d6b3f;font-weight:900;}
+.vote-item-row.top-2 .td-all,.vote-item-row.top-3 .td-all{color:#5a8a5c;font-weight:700;}
 .vote-legend{display:flex;gap:14px;align-items:center;margin-top:12px;font-size:11px;color:var(--dr-text-muted);font-family:var(--dr-font-mono);flex-wrap:wrap;}
 .legend-sep{color:var(--dr-border-dark);}
 </style>
@@ -633,8 +640,27 @@ function buildVoteTab() {
   });
 }
 
+
+function highlightTopRows() {
+  const ALL_VOTE_IDS = [...ABOVE_LINE,...BELOW_LINE,...NOT_IN_PLAN_IDS];
+  document.querySelectorAll('.vote-item-row').forEach(row=>{
+    row.classList.remove('top-1','top-2','top-3','top-4','top-5');
+  });
+  const scored = ALL_VOTE_IDS
+    .map(id=>({id,sum:getSum(id)}))
+    .filter(x=>x.sum>0)
+    .sort((a,b)=>a.sum-b.sum);
+  if(!scored.length) return;
+  let rank=0, prevSum=-1;
+  scored.forEach(item=>{
+    if(item.sum!==prevSum){rank++;prevSum=item.sum;}
+    if(rank<=5){const row=document.getElementById('vr-'+item.id);if(row)row.classList.add('top-'+rank);}
+  });
+}
+
 function renderAllRows() {
   [...ABOVE_LINE,...BELOW_LINE,...NOT_IN_PLAN_IDS].forEach(renderRow);
+  highlightTopRows();
 }
 
 function renderRow(itemId) {
@@ -653,7 +679,7 @@ function renderRow(itemId) {
   const ac=row.querySelector('[data-ac]'); if(!ac) return;
   const sum=getSum(itemId),count=getCount(itemId),flags=getFlags(itemId);
   if(sum>0||flags>0){
-    ac.innerHTML=(sum>0?`<strong>${sum}</strong> <span class="vc">(${count})</span>`:'')+( flags>0?` <span class="fi-badge">${flags}?</span>`:'');
+    ac.innerHTML=(sum>0?`<strong>${sum}</strong>`:'')+( flags>0?` <span class="fi-badge">${flags}?</span>`:'');
   } else { ac.textContent='–'; }
 }
 
